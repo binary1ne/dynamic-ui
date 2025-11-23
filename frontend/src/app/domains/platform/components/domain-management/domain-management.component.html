@@ -1,0 +1,135 @@
+<div class="domain-management">
+  <div class="header">
+    <h1>🌐 Domain Management</h1>
+    <button class="btn btn-primary" (click)="openCreateForm()">
+      + Create Domain
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <!-- Create/Edit Domain Form -->
+  <div *ngIf="showForm" class="create-form">
+    <h2>{{ editingDomain ? "Edit" : "Create" }} Domain</h2>
+    <form (ngSubmit)="saveDomain()">
+      <div class="form-group">
+        <label for="domain_name">Domain Name *</label>
+        <input
+          id="domain_name"
+          type="text"
+          [(ngModel)]="domainForm.domain_name"
+          name="domain_name"
+          placeholder="e.g., Marketing"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="domain_type">Domain Type</label>
+        <select
+          id="domain_type"
+          [(ngModel)]="domainForm.domain_type"
+          name="domain_type"
+        >
+          <option value="Custom">Custom</option>
+          <option value="Agentic">Agentic</option>
+          <option value="Guardrails">Guardrails</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          [(ngModel)]="domainForm.description"
+          name="description"
+          placeholder="Brief description of this domain"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="domainForm.signup_enabled"
+            name="signup_enabled"
+          />
+          Enable Signup for this domain
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          {{ loading ? "Saving..." : editingDomain ? "Update" : "Create" }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Domains List -->
+  <div class="domains-list" *ngIf="!loading && domains.length > 0">
+    <div class="domain-card" *ngFor="let domain of domains">
+      <div class="domain-header">
+        <div class="domain-info">
+          <h3>{{ domain.domain_name }}</h3>
+          <span class="domain-type">{{ domain.domain_type }}</span>
+          <span class="status-badge" [class.inactive]="!domain.active_flag">
+            {{ domain.active_flag ? "Active" : "Inactive" }}
+          </span>
+          <span *ngIf="domain.signup_enabled" class="signup-badge">
+            ✓ Signup Enabled
+          </span>
+        </div>
+        <div class="domain-actions">
+          <button class="btn-icon" (click)="openEditForm(domain)" title="Edit">
+            ✏️
+          </button>
+          <button
+            class="btn-icon"
+            (click)="toggleSignup(domain)"
+            [title]="domain.signup_enabled ? 'Disable Signup' : 'Enable Signup'"
+          >
+            {{ domain.signup_enabled ? "🔓" : "🔒" }}
+          </button>
+          <button
+            class="btn-icon danger"
+            (click)="deleteDomain(domain)"
+            *ngIf="domain.domain_name !== 'Platform'"
+            title="Delete"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <p class="domain-description">{{ domain.description }}</p>
+
+      <div
+        class="domain-roles"
+        *ngIf="domain.available_roles && domain.available_roles.length > 0"
+      >
+        <strong>Available Roles:</strong>
+        <div class="role-tags">
+          <span class="role-tag" *ngFor="let role of domain.available_roles">
+            {{ role }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading domains...</div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && domains.length === 0" class="empty-state">
+    <p>No domains found. Create your first domain to get started.</p>
+  </div>
+</div>
